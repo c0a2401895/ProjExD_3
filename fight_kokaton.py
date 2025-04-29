@@ -226,18 +226,18 @@ def main():
         #スペースキー押下でBeamインスタンス生成
     
         
-        for j , bomb in enumerate(bombs):
+        for j , bomb in enumerate(bombs): #bombのインデックスを取得
             for i,beam in enumerate(beams):
                 if beam is not None:
                     if beam.rct.colliderect(bomb.rct):
                         beams[i] = None
                         bombs[j] = None
-                        score_board.score += 1
+                        score_board.score += 1 # スコアを更新し，スコアボードに表示
                         score_board.img = score_board.fonto.render(f"スコア：{score_board.score}", 0, score_board.color)
-                        bird.change_img(6, screen)
+                        bird.change_img(6, screen) #うつす
                 bombs = [bomb for bomb in bombs if bomb is not None] # 撃ち落されてない爆弾だけのリスト
                 beams = [beam for beam in beams if beam is not None]
-        score_board.update(screen)    
+        score_board.update(screen) #更新  
 
         for bomb in bombs:
             for beam in beams:
