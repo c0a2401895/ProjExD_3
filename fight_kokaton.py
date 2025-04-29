@@ -159,7 +159,30 @@ class Bomb:
             self.vy *= -1
         self.rct.move_ip(self.vx, self.vy)
         screen.blit(self.img, self.rct)
-
+class Explosion:
+    def __init__(self,bomb_rct: pg.Rect):
+        """
+        爆発画像Surfaceを生成する
+        """
+        self.imgs = [
+            pg.image.load("fig/explosion.gif"),
+            pg.transform.flip(pg.image.load("fig/explosion.gif"), True, False)
+        ]
+        self.life = 30  # 爆発の表示時間（フレーム数）
+        self.rct = self.imgs[0].get_rect()
+        self.rct.center = bomb_rct.center  # 爆弾の中心座標
+        self.img_idx = 0  # 現在の画像インデックス
+    
+    def update(self, screen: pg.Surface):
+        """
+        爆発を表示する
+        引数 screen：画面Surface
+        """
+        if self.life > 0:
+            screen.blit(self.imgs[self.img_idx], self.rct)
+            self.life -= 1
+            if self.life % 5 == 0:
+                self.img_idx = (self.img_idx + 1) % len(self.imgs) #ちらちらしないための工夫
 
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
@@ -168,11 +191,12 @@ def main():
     bird = Bird((300, 200))
     beam = None
     beams = []  # Beamクラスのインスタンスを複数扱うための空のリスト
+
+
     bomb = Bomb((255, 0, 0), 10)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
-
-    #こうかとんがビームを放つたびにインスタンス生成
     
+    explosions = []  # Explosionクラスのインスタンスを複数扱うための空のリスト
     
     score_board = score()   # スコアボードのインスタンス生成
     clock = pg.time.Clock()
@@ -187,7 +211,7 @@ def main():
                 beam = Beam(bird)
                 beams.append(beam)            
         screen.blit(bg_img, [0, 0])
-
+        
         # if bomb is not None:
         for bomb in bombs:
             if bird.rct.colliderect(bomb.rct):
@@ -199,9 +223,8 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
-
         #スペースキー押下でBeamインスタンス生成
-
+    
         
         for j , bomb in enumerate(bombs):
             for i,beam in enumerate(beams):
@@ -216,6 +239,17 @@ def main():
                 beams = [beam for beam in beams if beam is not None]
         score_board.update(screen)    
 
+        for bomb in bombs:
+            for beam in beams:
+                if beam is not None and bomb is not None:
+                    if beam.rct.colliderect(bomb.rct):
+                        explosions.append(Explosion(bomb.rct))
+                        beams.remove(beam)
+                        bombs.remove(bomb)
+                        explosions = [explosion for explosion in explosions if explosion.life > 0]
+                        for explosion in explosions:
+                            explosion.update(screen)
+                            #ここまで途中
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         for beam in beams:
