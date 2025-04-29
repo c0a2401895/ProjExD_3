@@ -107,7 +107,27 @@ class Beam:
         """
         if check_bound(self.rct) == (True, True):
             self.rct.move_ip(self.vx, self.vy)
-            screen.blit(self.img, self.rct)    
+            screen.blit(self.img, self.rct)  
+
+class score:
+    def __init__(self):
+        """
+        スコアを管理するクラス
+        """
+        self.score = 0
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.color = (0, 0, 255)
+        self.img = self.fonto.render(f"スコア：{self.score}", 0, self.color)
+        self.rct = self.img.get_rect()
+        self.rct.center = (100, HEIGHT - 50)
+
+    def update(self, screen: pg.Surface):
+        """
+        スコアを画面に表示する
+        引数 screen：画面Surface
+        """
+        screen.blit(self.img, self.rct)
+
 
 
 class Bomb:
@@ -152,8 +172,10 @@ def main():
     # for i in  range(NUM_OF_BOMBS):
     #     bombs.append(Bomb((255, 0, 0), 10))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    score_board = score()   # スコアボードのインスタンス生成
     clock = pg.time.Clock()
     tmr = 0
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -181,8 +203,17 @@ def main():
                 if beam.rct.colliderect(bomb.rct):
                     beam = None
                     bombs[j] = None
+                    score_board.score += 1
+                    score_board.img = score_board.fonto.render(f"スコア：{score_board.score}", 0, score_board.color)
                     bird.change_img(6, screen)
+            score_board.update(screen)    
             bombs = [bomb for bomb in bombs if bomb is not None] # 撃ち落されてない爆弾だけのリスト
+        
+        #スコア加算
+        # for bomb in bombs:
+        #     if beam is not None and beam.rct.colliderect(bomb.rct):
+        #         score_board.score += 1  # スコアを1点加算
+        #     score_board.update(screen)  # スコアを描画
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
