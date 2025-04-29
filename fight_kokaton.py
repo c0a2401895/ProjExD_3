@@ -115,11 +115,11 @@ class score:
         スコアを管理するクラス
         """
         self.score = 0
-        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30)
+        self.fonto = pg.font.SysFont("hgp創英角ﾎﾟｯﾌﾟ体", 30) #スコアフォント
         self.color = (0, 0, 255)
-        self.img = self.fonto.render(f"スコア：{self.score}", 0, self.color)
+        self.img = self.fonto.render(f"スコア：{self.score}", 0, self.color) #指定すること
         self.rct = self.img.get_rect()
-        self.rct.center = (100, HEIGHT - 50)
+        self.rct.center = (100, HEIGHT - 50) #サイズ指定
 
     def update(self, screen: pg.Surface):
         """
