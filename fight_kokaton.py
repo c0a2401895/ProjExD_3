@@ -167,11 +167,13 @@ def main():
     bg_img = pg.image.load("fig/pg_bg.jpg")
     bird = Bird((300, 200))
     beam = None
+    beams = []  # Beamクラスのインスタンスを複数扱うための空のリスト
     bomb = Bomb((255, 0, 0), 10)
-    # bombs = []
-    # for i in  range(NUM_OF_BOMBS):
-    #     bombs.append(Bomb((255, 0, 0), 10))
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+
+    #こうかとんがビームを放つたびにインスタンス生成
+    
+    
     score_board = score()   # スコアボードのインスタンス生成
     clock = pg.time.Clock()
     tmr = 0
@@ -182,7 +184,8 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beam = Beam(bird)
+                beams.append(beam)            
         screen.blit(bg_img, [0, 0])
 
         # if bomb is not None:
@@ -196,28 +199,26 @@ def main():
                 pg.display.update()
                 time.sleep(1)
                 return
+
+        #スペースキー押下でBeamインスタンス生成
+
         
-            # if bomb is not None:
         for j , bomb in enumerate(bombs):
-            if beam is not None:
-                if beam.rct.colliderect(bomb.rct):
-                    beam = None
-                    bombs[j] = None
-                    score_board.score += 1
-                    score_board.img = score_board.fonto.render(f"スコア：{score_board.score}", 0, score_board.color)
-                    bird.change_img(6, screen)
-            score_board.update(screen)    
-            bombs = [bomb for bomb in bombs if bomb is not None] # 撃ち落されてない爆弾だけのリスト
-        
-        #スコア加算
-        # for bomb in bombs:
-        #     if beam is not None and beam.rct.colliderect(bomb.rct):
-        #         score_board.score += 1  # スコアを1点加算
-        #     score_board.update(screen)  # スコアを描画
+            for i,beam in enumerate(beams):
+                if beam is not None:
+                    if beam.rct.colliderect(bomb.rct):
+                        beams[i] = None
+                        bombs[j] = None
+                        score_board.score += 1
+                        score_board.img = score_board.fonto.render(f"スコア：{score_board.score}", 0, score_board.color)
+                        bird.change_img(6, screen)
+                bombs = [bomb for bomb in bombs if bomb is not None] # 撃ち落されてない爆弾だけのリスト
+                beams = [beam for beam in beams if beam is not None]
+        score_board.update(screen)    
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if beam is not None:
+        for beam in beams:
             beam.update(screen)   
         for bomb in bombs:
             bomb.update(screen)
